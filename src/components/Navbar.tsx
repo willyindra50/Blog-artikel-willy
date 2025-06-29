@@ -4,7 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { X, Menu, Search } from 'lucide-react'; // optional icon lib
+import { X, Menu } from 'lucide-react';
 
 interface User {
   name: string;
@@ -47,7 +47,7 @@ export default function Navbar() {
           <span className='font-semibold text-lg'>Your Logo</span>
         </div>
 
-        {/* Desktop: Search Bar */}
+        {/* Desktop Search */}
         <div className='hidden md:block w-full max-w-md relative'>
           <form
             onSubmit={(e) => {
@@ -59,7 +59,7 @@ export default function Navbar() {
                 router.push(`/search?q=${encodeURIComponent(q)}`);
               }
             }}
-            className='hidden md:block w-full max-w-md relative'
+            className='w-full relative'
           >
             <input
               name='search'
@@ -77,7 +77,7 @@ export default function Navbar() {
           </form>
         </div>
 
-        {/* Desktop */}
+        {/* Desktop User Area */}
         <div className='hidden md:flex items-center gap-4 relative'>
           {user ? (
             <>
@@ -94,7 +94,6 @@ export default function Navbar() {
                 />
                 <span>Write Post</span>
               </Link>
-
               <div className='w-px h-6 bg-gray-300'></div>
               <div
                 className='flex items-center gap-2 cursor-pointer'
@@ -145,16 +144,23 @@ export default function Navbar() {
           )}
         </div>
 
-        {/* Mobile */}
+        {/* Mobile User Area */}
         <div className='md:hidden flex items-center gap-4'>
+          {/* Search Icon selalu tampil */}
+          <Image
+            src='/search-icon.png'
+            alt='Search'
+            width={20}
+            height={20}
+            className='cursor-pointer object-contain'
+            onClick={() => router.push('/search')}
+          />
+
           {!user ? (
-            <>
-              <Search className='w-5 h-5 text-gray-600' />
-              <Menu
-                className='w-6 h-6 text-gray-800'
-                onClick={() => setShowMobileMenu(true)}
-              />
-            </>
+            <Menu
+              className='w-6 h-6 text-gray-800 cursor-pointer'
+              onClick={() => setShowMobileMenu(true)}
+            />
           ) : (
             <div className='relative'>
               <div
@@ -191,7 +197,7 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Mobile Drawer Menu */}
+      {/* Mobile Menu */}
       {showMobileMenu && !user && (
         <div className='fixed top-0 left-0 w-full h-full bg-white z-50 flex flex-col items-center justify-center'>
           <button
