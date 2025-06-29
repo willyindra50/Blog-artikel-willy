@@ -4,7 +4,6 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
 import Image from 'next/image';
-import Navbar from '@/components/Navbar';
 import { localApi } from '@/api-local';
 import { parseLexicalContent } from '@/utils/parseLexicalContent';
 import { useState } from 'react';
@@ -26,18 +25,17 @@ const fetchSearchResults = async (q: string): Promise<Post[]> => {
   return res.data.data;
 };
 
-export default function SearchPage() {
+export default function SearchContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const query = searchParams.get('q') || '';
+  const [keyword, setKeyword] = useState(query);
 
   const { data: posts, isLoading } = useQuery({
     queryKey: ['search-results', query],
     queryFn: () => fetchSearchResults(query),
     enabled: !!query,
   });
-
-  const [keyword, setKeyword] = useState(query);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,8 +46,6 @@ export default function SearchPage() {
 
   return (
     <>
-      <Navbar />
-
       {/* Search input versi mobile */}
       <form onSubmit={handleSubmit} className='md:hidden px-4 mt-6'>
         <div className='w-full bg-white border rounded-xl px-4 py-2 flex items-center'>
@@ -93,7 +89,7 @@ export default function SearchPage() {
                     const target = e.target as HTMLImageElement;
                     target.src = '/home.png';
                   }}
-                  unoptimized // Tambahkan jika gambar dari domain luar yang tidak terdaftar
+                  unoptimized
                 />
 
                 <div className='flex-1'>
