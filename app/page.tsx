@@ -21,13 +21,22 @@ interface Post {
   comments: number;
 }
 
+interface RecommendedResponse {
+  data: Post[];
+  page: number;
+  total: number;
+  lastPage: number;
+}
+
 const POSTS_PER_PAGE = 5;
 
-const fetchRecommendedPosts = async (page: number): Promise<Post[]> => {
+const fetchRecommendedPosts = async (
+  page: number
+): Promise<RecommendedResponse> => {
   const res = await API.get(
     `/posts/recommended?page=${page}&limit=${POSTS_PER_PAGE}`
   );
-  return res.data.data;
+  return res.data;
 };
 
 const fetchMostLikedPosts = async (): Promise<Post[]> => {
@@ -37,20 +46,26 @@ const fetchMostLikedPosts = async (): Promise<Post[]> => {
 
 export default function Home() {
   const [currentPage, setCurrentPage] = useState(1);
-  const totalPages = 5;
 
-  const { data: recommended, isLoading: loadingRecommended } = useQuery({
-    queryKey: ['recommended-posts', currentPage],
-    queryFn: () => fetchRecommendedPosts(currentPage),
-  });
+  const { data: recommendedResponse, isLoading: loadingRecommended } =
+    useQuery<RecommendedResponse>({
+      queryKey: ['recommended-posts', currentPage],
+      queryFn: () => fetchRecommendedPosts(currentPage),
+      staleTime: 1000 * 60,
+      retry: 1,
+      refetchOnWindowFocus: false,
+    });
 
-  const { data: mostLiked, isLoading: loadingMostLiked } = useQuery({
+  const { data: mostLiked, isLoading: loadingMostLiked } = useQuery<Post[]>({
     queryKey: ['most-liked-posts'],
     queryFn: fetchMostLikedPosts,
   });
 
   if (loadingRecommended || loadingMostLiked)
     return <div className='text-center py-10'>Loading...</div>;
+
+  const recommended = recommendedResponse?.data || [];
+  const totalPages = recommendedResponse?.lastPage || 1;
 
   return (
     <>
@@ -60,7 +75,7 @@ export default function Home() {
         <section>
           <h2 className='text-2xl font-semibold mb-4'>Recommended for You</h2>
           <div className='space-y-14'>
-            {recommended?.map((post) => (
+            {recommended.map((post) => (
               <Link key={post.id} href={`/posts/${post.id}`} className='block'>
                 <article className='flex flex-col md:flex-row border-b border-gray-200 gap-4'>
                   <ImageWithFallback
@@ -82,9 +97,9 @@ export default function Home() {
                         {post.title}
                       </h3>
                       <div className='flex flex-wrap gap-2 mb-2 text-xs'>
-                        {post.tags.map((tag) => (
+                        {post.tags.map((tag, index) => (
                           <span
-                            key={tag}
+                            key={`${post.id}-${index}`}
                             className='bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full'
                           >
                             {tag}
@@ -115,7 +130,7 @@ export default function Home() {
           <h3 className='text-lg font-semibold mb-2'>Most Liked</h3>
           {mostLiked?.slice(0, 3).map((post) => (
             <div
-              key={post.id}
+              key={`most-liked-${post.id}`}
               className='pb-4 border-b border-gray-200 space-y-1'
             >
               <p className='font-semibold text-sm line-clamp-2'>{post.title}</p>

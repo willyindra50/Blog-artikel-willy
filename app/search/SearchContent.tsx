@@ -4,12 +4,12 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
 import Image from 'next/image';
-import { localApi } from '@/api-local';
+import axios from 'axios';
 import { parseLexicalContent } from '@/utils/parseLexicalContent';
 import { useState } from 'react';
 
 interface Post {
-  id: string;
+  id: number;
   title: string;
   content: string;
   tags: string[];
@@ -21,7 +21,10 @@ interface Post {
 }
 
 const fetchSearchResults = async (q: string): Promise<Post[]> => {
-  const res = await localApi.get(`/posts/search?q=${q}`);
+  const url = `${
+    process.env.NEXT_PUBLIC_API_BASE_URL
+  }posts/search?query=${encodeURIComponent(q)}&page=1`;
+  const res = await axios.get(url);
   return res.data.data;
 };
 
@@ -76,7 +79,7 @@ export default function SearchContent() {
               >
                 <Image
                   src={
-                    post.imageUrl?.startsWith('http') && post.imageUrl.trim()
+                    post.imageUrl?.startsWith('http')
                       ? post.imageUrl
                       : '/home.png'
                   }
@@ -84,10 +87,6 @@ export default function SearchContent() {
                   width={280}
                   height={180}
                   className='w-full md:w-[280px] h-[180px] object-cover rounded-xl border'
-                  onError={(e) => {
-                    const target = e.target as HTMLImageElement;
-                    target.src = '/home.png';
-                  }}
                   unoptimized
                 />
                 <div className='flex-1'>

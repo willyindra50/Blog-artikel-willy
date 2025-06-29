@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    domains: ['truthful-simplicity-production.up.railway.app'],
+    domains: ['blogger-wph-api-production.up.railway.app'],
   },
 };
 
